@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLEX GO - EDGE∞ PROTOTYPE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #FF6B00;
+            --accent-2: #00D4FF;
+            --accent-3: #FF0080;
+            --bg: #000008;
+            --txt: #F5F5F7;
+            --grid: rgba(255,255,255,.08);
+            --noise: rgba(255,107,0,.4);
+            --neon-glow: 0 0 20px currentColor, 0 0 40px currentColor, 0 0 80px currentColor;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--bg);
+            color: var(--txt);
+            overflow-x: hidden;
+            line-height: 1.6;
+            cursor: none;
+        }
+        
+        /* Custom Cursor */
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.8;
+        }
+        
+        /* Background Particles */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -100;
+            opacity: 0.6;
+        }
+        
+        .container {
+            max-inline-size: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Header */
+        #nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(0, 0, 8, 0.8);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 107, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #nav.scrolled {
+            background: rgba(0, 0, 8, 0.95);
+            border-bottom: 1px solid rgba(255, 107, 0, 0.6);
+            box-shadow: var(--neon-glow);
+        }
+        
+        #nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            background: linear-gradient(45deg, var(--accent), var(--accent-2), var(--accent-3));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes glow {
+            0% { filter: brightness(100%); }
+            100% { filter: brightness(150%) drop-shadow(0 0 20px var(--accent)); }
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--txt);
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::before,
+        .nav-links a:focus::before {
+            width: 100%;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a:focus {
+            color: var(--accent);
+            text-shadow: var(--neon-glow);
+            transform: translateY(-2px);
+        }
+        
+        /* Hero */
+        #hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(255, 107, 0, 0.1) 0%, transparent 50%);
+        }
+        
+        #hero video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -3;
+            filter: brightness(0.4) contrast(1.2) saturate(1.5);
+        }
+        
+        #noise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.4;
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .hero-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(4rem, 12vw, 12rem);
+            font-weight: 900;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #fff, var(--accent), var(--accent-2), var(--accent-3));
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: megaGradient 4s ease-in-out infinite, textGlow 3s ease-in-out infinite alternate;
+            text-shadow: 0 0 100px rgba(255, 107, 0, 0.5);
+            letter-spacing: -2px;
+        }
+        
+        @keyframes megaGradient {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+        }
+        
+        @keyframes textGlow {
+            0% { 
+                filter: brightness(100%) drop-shadow(0 0 20px var(--accent));
+                transform: scale(1);
+            }
+            100% { 
+                filter: brightness(200%) drop-shadow(0 0 60px var(--accent)) drop-shadow(0 0 100px var(--accent-2));
+                transform: scale(1.02);
+            }
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            min-height: 80px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        
+        .cta-btn {
+            background: linear-gradient(45deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent));
+            background-size: 300% 300%;
+            color: white;
+            padding: 1.5rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            animation: buttonGradient 3s ease-in-out infinite;
+        }
+        
+        @keyframes buttonGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cta-btn:hover::before,
+        .cta-btn:focus::before {
+            left: 100%;
+        }
+        
+        .cta-btn:hover,
+        .cta-btn:focus {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(255, 107, 0, 0.6), var(--neon-glow);
+        }
+        
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--accent), var(--accent-2));
+            border-radius: 20px;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-element:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { top: 60%; right: 15%; animation-delay: 2s; }
+        .floating-element:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 4s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+        
+        /* Showroom */
+        #showroom {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg) 0%, #0a0a2e 50%, var(--bg) 100%);
+        }
+        
+        #webgl {
+            width: 100%;
+            height: 100%;
+            display: block;
+            filter: brightness(1.2) contrast(1.1);
+        }
+        
+        .showroom-info {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background: rgba(0, 0, 8, 0.8);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            box-shadow: var(--neon-glow);
+        }
+        
+        .showroom-info h2 {
+            font-family: 'Orbitron', monospace;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            text-shadow: var(--neon-glow);
+        }
+        
+        /* Hologram Effect */
+        .hologram {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(45deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            border: 2px solid var(--accent-2);
+            border-radius: 50%;
+            animation: hologramSpin 4s linear infinite;
+        }
+        
+        @keyframes hologramSpin {
+            0% { transform: translate(-50%, -50%) rotateY(0deg); }
+            100% { transform: translate(-50%, -50%) rotateY(360deg); }
+        }
+        
+        /* Metrics */
+        #metric {
+            padding: 10rem 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, var(--bg) 0%, #0f0f1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 4rem;
+            margin-top: 4rem;
+            perspective: 1000px;
+        }
+        
+        .metric-card {
+            text-align: center;
+            position: relative;
+            padding: 3rem 2rem;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.1), transparent);
+            transition: left 1s ease;
+        }
+        
+        .metric-card:hover::before {
+            left: 100%;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-20px) rotateX(5deg) rotateY(5deg);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.3),
+                0 0 40px rgba(255, 107, 0, 0.4),
+                inset 0 0 40px rgba(255, 107, 0, 0.1);
+            border-color: var(--accent);
+        }
+        
+        .num {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(4rem, 8vw, 8rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            text-shadow: var(--neon-glow);
+            animation: numberPulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes numberPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        .metric-label {
+            font-size: 1.4rem;
+            margin-top: 1rem;
+            opacity: 0.9;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Particle Lines */
+        .particle-line {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(180deg, transparent, var(--accent), transparent);
+            animation: particleDrift 4s linear infinite;
+        }
+        
+        @keyframes particleDrift {
+            0% { opacity: 0; transform: translateY(-50px); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(150px); }
+        }
+        
+        /* Clients */
+        #clients {
+            padding: 10rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, #0f0f1a 0%, var(--bg) 100%);
+            position: relative;
+        }
+        
+        .client-constellation {
+            margin-top: 6rem;
+            position: relative;
+            height: 400px;
+        }
+        
+        .star {
+            position: absolute;
+            font-size: 4rem;
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.5s ease;
+            animation: starTwinkle 3s ease-in-out infinite;
+        }
+        
+        @keyframes starTwinkle {
+            0%, 100% { 
+                opacity: 0.7; 
+                transform: scale(1) rotate(0deg);
+                filter: brightness(100%);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.2) rotate(180deg);
+                filter: brightness(150%) drop-shadow(0 0 30px currentColor);
+            }
+        }
+        
+        .star:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .star:nth-child(2) { top: 40%; right: 20%; animation-delay: 0.6s; }
+        .star:nth-child(3) { bottom: 30%; left: 25%; animation-delay: 1.2s; }
+        .star:nth-child(4) { top: 60%; left: 50%; animation-delay: 1.8s; }
+        .star:nth-child(5) { bottom: 20%; right: 30%; animation-delay: 2.4s; }
+        
+        .star:hover,
+        .star:focus {
+            transform: scale(1.5) rotate(360deg);
+            filter: brightness(200%) drop-shadow(0 0 50px currentColor);
+            z-index: 100;
+        }
+        
+        .testimonial {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, var(--accent), var(--accent-2));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            width: 280px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            box-shadow: var(--neon-glow);
+            font-weight: 600;
+        }
+        
+        .star:hover .testimonial,
+        .star:focus .testimonial {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        
+        /* Contact */
+        #contact {
+            padding: 10rem 0;
+            background: 
+                radial-gradient(circle at center, rgba(255, 0, 128, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a2e 0%, var(--bg) 100%);
+            position: relative;
+        }
+        
+        .contact-form {
+            max-width: 700px;
+            margin: 6rem auto 0;
+            padding: 4rem;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.3),
+                inset 0 0 60px rgba(255, 107, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .contact-form::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255, 107, 0, 0.1), transparent);
+            animation: formRotate 10s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes formRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .form-group {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1.5rem;
+            border: 2px solid rgba(255, 107, 0, 0.3);
+            border-radius: 15px;
+            background: rgba(0, 0, 8, 0.8);
+            color: var(--txt);
+            font-family: inherit;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.4);
+            background: rgba(0, 0, 8, 0.9);
+        }
+        
+        /* PWA Ribbon */
+        .pwa-ribbon {
+            position: fixed;
+            top: 50%;
+            right: -350px;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, var(--accent), var(--accent-2));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px 0 0 15px;
+            transition: right 0.5s ease;
+            z-index: 1000;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: var(--neon-glow);
+            animation: ribbonPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes ribbonPulse {
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.05); }
+        }
+        
+        .pwa-ribbon.visible {
+            right: 0;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 6rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--bg) 0%, #0a0a2e 100%);
+        }
+        
+        #confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            padding: 1.5rem;
+            background: linear-gradient(45deg, rgba(255, 107, 0, 0.2), rgba(0, 212, 255, 0.2));
+            border-radius: 50%;
+            color: var(--txt);
+            text-decoration: none;
+            transition: all 0.5s ease;
+            font-size: 2rem;
+            border: 2px solid rgba(255, 107, 0, 0.3);
+            animation: socialFloat 4s ease-in-out infinite;
+        }
+        
+        @keyframes socialFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        
+        .social-links a:hover,
+        .social-links a:focus {
+            background: linear-gradient(45deg, var(--accent), var(--accent-2));
+            transform: scale(1.2) rotate(15deg);
+            box-shadow: var(--neon-glow);
+            border-color: var(--accent);
+        }
+        
+        /* Matrix Rain Effect */
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -50;
+            opacity: 0.1;
+        }
+        
+        /* Glitch Effect */
+        .glitch {
+            animation: glitch 2s infinite;
+        }
+        
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .metric-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .hero-title { font-size: clamp(3rem, 10vw, 8rem); }
+            .client-constellation { height: 300px; }
+            .star { font-size: 2.5rem; }
+            .social-links { gap: 1.5rem; }
+        }
+        
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 1s ease;
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 100px;
+            height: 100px;
+            border: 4px solid rgba(255, 107, 0, 0.3);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/index-CK-2IZnm.js"></script>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+    </div>
+    
+    <div class="cursor" id="cursor"></div>
+    
+    <canvas id="bg-canvas"></canvas>
+    <canvas class="matrix-rain" id="matrix"></canvas>
+    
+    <header id="nav">
+        <div class="container">
+            <div class="logo glitch">FLEX GO EDGE∞</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#hero">ホーム</a></li>
+                    <li><a href="#showroom">車両</a></li>
+                    <li><a href="#metric">実績</a></li>
+                    <li><a href="#contact">コンタクト</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="hero">
+        <video autoplay muted loop aria-label="次世代配送映像">
+            <source src="/assets/hero.mp4" type="video/mp4">
+        </video>
+        <canvas id="noise" aria-hidden="true"></canvas>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">EDGE∞</h1>
+            <p class="hero-subtitle" id="typewriter-text">NEXT-GEN LOGISTICS REVOLUTION</p>
+            <a href="#contact" class="cta-btn">ACTIVATE MISSION</a>
+        </div>
+    </section>
+
+    <section id="showroom">
+        <div class="showroom-info">
+            <h2>QUANTUM GARAGE</h2>
+            <p>360° NEURAL INTERFACE</p>
+        </div>
+        <div class="hologram"></div>
+        <canvas id="webgl" aria-label="3D量子車両モデル"></canvas>
+    </section>
+
+    <section id="metric">
+        <div class="container">
+            <h2 style="text-align: center; font-size: clamp(3rem, 8vw, 6rem); margin-bottom: 2rem; font-family: 'Orbitron', monospace; background: linear-gradient(45deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: var(--neon-glow);">QUANTUM METRICS</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="particle-line" style="left: 20%; animation-delay: 0s;"></div>
+                    <div class="particle-line" style="right: 20%; animation-delay: 1s;"></div>
+                    <div class="num" data-val="∞">0</div>
+                    <div class="metric-label">PARALLEL DELIVERIES</div>
+                </div>
+                <div class="metric-card">
+                    <div class="particle-line" style="left: 30%; animation-delay: 0.5s;"></div>
+                    <div class="particle-line" style="right: 30%; animation-delay: 1.5s;"></div>
+                    <div class="num" data-val="9999">0</div>
+                    <div class="metric-label">LIGHT-SPEED KM/H</div>
+                </div>
+                <div class="metric-card">
+                    <div class="particle-line" style="left: 40%; animation-delay: 1s;"></div>
+                    <div class="particle-line" style="right: 10%; animation-delay: 2s;"></div>
+                    <div class="num" data-val="2077">0</div>
+                    <div class="metric-label">FUTURE YEARS</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="clients">
+        <div class="container">
+            <h2 style="text-align: center; font-size: clamp(3rem, 8vw, 6rem); margin-bottom: 2rem; font-family: 'Orbitron', monospace; background: linear-gradient(45deg, var(--accent-2), var(--accent-3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NEURAL NETWORK</h2>
+            <div class="client-constellation">
+                <div class="star" tabindex="0" role="button" aria-label="Neural Node Alpha">
+                    ⭐
+                    <div class="testimonial">QUANTUM DELIVERY EXCEEDED ALL EXPECTATIONS! 🚀</div>
+                </div>
+                <div class="star" tabindex="0" role="button" aria-label="Neural Node Beta">
+                    ✨
+                    <div class="testimonial">COST REDUCTION BY 500% WITH EDGE TECH! 💎</div>
+                </div>
+                <div class="star" tabindex="0" role="button" aria-label="Neural Node Gamma">
+                    💫
+                    <div class="testimonial">24/7 NEURAL ASSISTANCE IS REVOLUTIONARY! ⚡</div>
+                </div>
+                <div class="star" tabindex="0" role="button" aria-label="Neural Node Delta">
+                    🌟
+                    <div class="testimonial">ZERO-EMISSION QUANTUM TRANSPORT! 🌱</div>
+                </div>
+                <div class="star" tabindex="0" role="button" aria-label="Neural Node Epsilon">
+                    ⚡
+                    <div class="testimonial">REAL-TIME QUANTUM TRACKING SYSTEM! 🎯</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <h2 style="text-align: center; font-size: clamp(3rem, 8vw, 6rem); margin-bottom: 2rem; font-family: 'Orbitron', monospace; background: linear-gradient(45deg, var(--accent-3), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NEURAL INTERFACE</h2>
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="name">NEURAL ID</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">QUANTUM ADDRESS</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">MISSION PARAMETERS</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="cta-btn">INITIATE QUANTUM LINK</button>
+            </form>
+        </div>
+    </section>
+
+    <div class="pwa-ribbon" id="pwaRibbon" role="button" tabindex="0" aria-label="Quantum App Install">
+        🚀 INSTALL QUANTUM INTERFACE FOR OFFLINE POWER
+    </div>
+
+    <footer>
+        <canvas id="confetti" aria-hidden="true"></canvas>
+        <div class="container">
+            <p style="font-family: 'Orbitron', monospace; color: var(--accent);">&copy; 2077 FLEX GO EDGE∞. QUANTUM RIGHTS RESERVED.</p>
+            <div class="social-links">
+                <a href="#" aria-label="Neural X">🧠</a>
+                <a href="#" aria-label="Quantum Gram">⚛️</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js" type="module"></script>
+    <script src="https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js" type="module"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.29/dist/lenis.min.js"></script>
+</body>
+</html>

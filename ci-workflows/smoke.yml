@@ -1,0 +1,60 @@
+name: Smoke (Invoices)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect URLs
+        run: |
+          chmod +x scripts/detect-urls.sh
+          ./scripts/detect-urls.sh | tee urls.out
+          grep '^export ' urls.out > exports.sh || true
+
+      - name: Export URLs
+        run: |
+          set -e
+          if [ -f exports.sh ]; then
+            source exports.sh
+            echo "STG_URL=$STG_URL" >> $GITHUB_ENV
+            echo "PROD_URL=$PROD_URL" >> $GITHUB_ENV
+          fi
+
+      - name: Staging Smoke (save + refresh)
+        if: ${{ env.STG_URL != '' }}
+        env:
+          HOST: ${{ env.STG_URL }}
+          MODE: save
+          TEST_REFRESH: "true"
+          REFRESH_PATH_KEY: path
+          DOC_TYPE: invoice
+          BYTES_MIN: "2048"
+          TIMEOUT: "45"
+          EXPECT_HELMET: "true"
+          EXPECT_RATELIMIT: "true"
+        run: |
+          chmod +x scripts/post-release-smoke.sh
+          ./scripts/post-release-smoke.sh
+
+      - name: Production Smoke (download only)
+        if: ${{ env.PROD_URL != '' }}
+        env:
+          HOST: ${{ env.PROD_URL }}
+          MODE: download
+          DOC_TYPE: invoice
+          BYTES_MIN: "2048"
+          TIMEOUT: "30"
+          EXPECT_HELMET: "true"
+          EXPECT_RATELIMIT: "true"
+        run: |
+          chmod +x scripts/post-release-smoke.sh
+          ./scripts/post-release-smoke.sh
+

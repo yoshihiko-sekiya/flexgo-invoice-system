@@ -21,6 +21,8 @@
     "release": "standard-version"
   },
   "dependencies": {
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
     "@ionic/vue": "^8.3.2",
     "@ionic/vue-router": "^8.3.2",
     "@sentry/node": "^10.4.0",

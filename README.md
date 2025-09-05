@@ -158,6 +158,26 @@ services:
     volumes:
       - ./server:/app/server
       - ./src/templates:/app/src/templates
+
+## CI/CD Setup (GitHub Actions)
+
+Because of GitHub's workflow permissions, pushing `.github/workflows` from some clients may be blocked. This repo includes ready-to-use templates under `ci-workflows/`.
+
+Quick setup:
+- Copy each template to `.github/workflows/` via GitHub Web UI:
+  - `ci-workflows/smoke.yml` → `.github/workflows/smoke.yml`
+  - `ci-workflows/e2e.yml` → `.github/workflows/e2e.yml`
+  - `ci-workflows/promtool.yml` → `.github/workflows/promtool.yml`
+- Or locally print contents to copy/paste:
+  - `bash scripts/print-workflows.sh`
+- Add GitHub Secrets (Settings → Secrets and variables → Actions):
+  - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+  - (optional) `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+
+Workflows overview:
+- `Smoke (Invoices)`: staging save+refresh, production download-only
+- `E2E (Invoices)`: local dev servers + Cypress E2E for invoice flow
+- `Promtool`: static validation of `prometheus-rule.yml`
 ```
 
 ## Storage Security & Access Control

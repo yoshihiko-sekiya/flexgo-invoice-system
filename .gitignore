@@ -30,6 +30,7 @@ build/
 # Logs
 logs
 *.log
+cypress-results.json
 
 # OS generated files
 Thumbs.db

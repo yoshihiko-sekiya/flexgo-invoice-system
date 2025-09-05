@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mentor-api
+  labels:
+    app: mentor-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mentor-api
+  template:
+    metadata:
+      labels:
+        app: mentor-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/OWNER/REPO:v1.1.0
+          ports:
+            - containerPort: 8787
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: SECURITY_REQUIRED
+              value: "true"
+            - name: SECURITY_FAIL_FAST
+              value: "false" # 段階導入
+            - name: CORS_ORIGINS
+              value: "https://app.example.com,https://admin.example.com"
+            - name: SUPABASE_SIGNED_URL_TTL_HOURS
+              value: "168"
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8787
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8787
+            initialDelaySeconds: 10
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mentor-api
+spec:
+  selector:
+    app: mentor-api
+  ports:
+    - name: http
+      port: 8787
+      targetPort: 8787

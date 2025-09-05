@@ -3,53 +3,48 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# Build outputs
+# Production
 dist/
 build/
-.cache/
 
 # Environment files
 .env
 .env.local
-.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# IDE files
-.vscode/
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
 .idea/
-*.swp
-*.swo
-
-# OS files
 .DS_Store
-Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # Logs
+logs
 *.log
 
-# Runtime files
-*.pid
-*.seed
-*.pid.lock
+# OS generated files
+Thumbs.db
 
-# Coverage
-coverage/
+# Temporary folders
+tmp/
+temp/
 
-# Cypress
-cypress/screenshots/
-cypress/videos/
-
-# Temp files
-*.tmp
-*.temp
-/tmp/
-
-# Package manager files
-.pnpm-debug.log*
-.yarn-integrity
+# Cache directories
+.cache/
+.parcel-cache/
 
 # Vite cache
-node_modules/.vite/
+.vite/
 
-# Supabase
-.supabase/
+# Capacitor
+ios/
+android/

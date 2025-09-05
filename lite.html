@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLEX GO - EDGE∞ LITE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #FF6B00;
+            --accent-2: #00D4FF;
+            --accent-3: #FF0080;
+            --bg: #000008;
+            --txt: #F5F5F7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--bg);
+            color: var(--txt);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Header */
+        #nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 8, 0.9);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 107, 0, 0.3);
+        }
+        
+        #nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            background: linear-gradient(45deg, var(--accent), var(--accent-2), var(--accent-3));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--txt);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a:focus {
+            color: var(--accent);
+            text-shadow: 0 0 20px currentColor;
+        }
+        
+        /* Hero */
+        #hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(255, 107, 0, 0.1) 0%, transparent 50%);
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+        }
+        
+        .hero-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(4rem, 12vw, 12rem);
+            font-weight: 900;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #fff, var(--accent), var(--accent-2), var(--accent-3));
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: megaGradient 4s ease-in-out infinite;
+            letter-spacing: -2px;
+        }
+        
+        @keyframes megaGradient {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            min-height: 80px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        
+        .cta-btn {
+            background: linear-gradient(45deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent));
+            background-size: 300% 300%;
+            color: white;
+            padding: 1.5rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: buttonGradient 3s ease-in-out infinite;
+        }
+        
+        @keyframes buttonGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .cta-btn:hover,
+        .cta-btn:focus {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(255, 107, 0, 0.6);
+        }
+        
+        /* Sections */
+        section {
+            padding: 8rem 0;
+            text-align: center;
+        }
+        
+        h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: 4rem;
+            background: linear-gradient(45deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 4rem;
+            margin-top: 4rem;
+        }
+        
+        .metric-card {
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+        
+        .num {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(4rem, 8vw, 6rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        
+        .metric-label {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Contact */
+        .contact-form {
+            max-width: 600px;
+            margin: 4rem auto 0;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 107, 0, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 8, 0.8);
+            color: var(--txt);
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 4rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 107, 0, 0.2);
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            padding: 1rem;
+            background: rgba(255, 107, 0, 0.2);
+            border-radius: 50%;
+            color: var(--txt);
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+        
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header id="nav">
+        <div class="container">
+            <div class="logo">FLEX GO EDGE∞</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#hero">ホーム</a></li>
+                    <li><a href="#metrics">実績</a></li>
+                    <li><a href="#contact">コンタクト</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">EDGE∞</h1>
+            <p class="hero-subtitle" id="typewriter">NEXT-GEN LOGISTICS REVOLUTION</p>
+            <a href="#contact" class="cta-btn">ACTIVATE MISSION</a>
+        </div>
+    </section>
+
+    <section id="metrics">
+        <div class="container">
+            <h2>QUANTUM METRICS</h2>
+            <div class="metric-grid">
+                <div class="metric-card fade-in">
+                    <div class="num" data-val="∞">∞</div>
+                    <div class="metric-label">PARALLEL DELIVERIES</div>
+                </div>
+                <div class="metric-card fade-in">
+                    <div class="num" data-val="9999">9,999</div>
+                    <div class="metric-label">LIGHT-SPEED KM/H</div>
+                </div>
+                <div class="metric-card fade-in">
+                    <div class="num" data-val="2077">2,077</div>
+                    <div class="metric-label">FUTURE YEARS</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <h2>NEURAL INTERFACE</h2>
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="name">NEURAL ID</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">QUANTUM ADDRESS</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">MISSION PARAMETERS</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="cta-btn">INITIATE QUANTUM LINK</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p style="font-family: 'Orbitron', monospace; color: var(--accent);">&copy; 2077 FLEX GO EDGE∞. QUANTUM RIGHTS RESERVED.</p>
+            <div class="social-links">
+                <a href="#" aria-label="Neural X">🧠</a>
+                <a href="#" aria-label="Quantum Gram">⚛️</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 即座にアニメーション開始
+        document.addEventListener('DOMContentLoaded', function() {
+            // タイプライター効果
+            function typeWriter() {
+                const texts = [
+                    "NEXT-GEN LOGISTICS REVOLUTION",
+                    "QUANTUM PROTOCOLS ACTIVATED",
+                    "NEURAL NETWORKS ONLINE",
+                    "WELCOME TO THE FUTURE"
+                ];
+                let textIndex = 0;
+                let charIndex = 0;
+                const element = document.getElementById('typewriter');
+                
+                function type() {
+                    if (charIndex < texts[textIndex].length) {
+                        element.textContent += texts[textIndex].charAt(charIndex);
+                        charIndex++;
+                        setTimeout(type, 100);
+                    } else {
+                        setTimeout(() => {
+                            element.textContent = '';
+                            charIndex = 0;
+                            textIndex = (textIndex + 1) % texts.length;
+                            type();
+                        }, 2000);
+                    }
+                }
+                
+                element.textContent = '';
+                type();
+            }
+            
+            setTimeout(typeWriter, 1000);
+            
+            // フェードインアニメーション
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationDelay = '0s';
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // フォーム送信
+            document.getElementById('contactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                const message = formData.get('message');
+                
+                const subject = encodeURIComponent('QUANTUM MISSION REQUEST FROM ' + name);
+                const body = encodeURIComponent(`NEURAL ID: ${name}\nQUANTUM ADDRESS: ${email}\nMISSION: ${message}`);
+                
+                window.location.href = `mailto:flexgo.7983150@gmail.com?subject=${subject}&body=${body}`;
+                
+                // 成功メッセージ
+                alert('🚀 QUANTUM LINK ESTABLISHED! ⚡');
+            });
+            
+            // スムーススクロール
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

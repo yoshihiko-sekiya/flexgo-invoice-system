@@ -1,0 +1,112 @@
+groups:
+  - name: pdf-signed-url
+    rules:
+      - alert: ExpiredSignedUrlRateWarn
+        expr: |
+          sum(rate(expired_signed_url_encounters_total[15m]))
+          /
+          clamp_min(sum(rate(pdf_requests_total{route="save",status="ok"}[15m])), 1)
+          > 0.03
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Signed URL TTL expiries rising (>3%/15m)"
+          description: |
+            The rate of expired signed URL encounters has exceeded 3% of successful PDF save operations
+            over the last 15 minutes. This may indicate that the TTL setting is too short for typical
+            user workflows. Current rate: {{ $value | humanizePercentage }}
+          
+      - alert: ExpiredSignedUrlRateCrit
+        expr: |
+          sum(rate(expired_signed_url_encounters_total[15m]))
+          /
+          clamp_min(sum(rate(pdf_requests_total{route="save",status="ok"}[15m])), 1)
+          > 0.10
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Signed URL TTL expiries critical (>10%/15m)"
+          description: |
+            The rate of expired signed URL encounters has exceeded 10% of successful PDF save operations
+            over the last 15 minutes. This indicates a significant user experience issue that requires
+            immediate attention. Consider increasing the SUPABASE_SIGNED_URL_TTL_HOURS setting.
+            Current rate: {{ $value | humanizePercentage }}
+
+  - name: pdf-performance
+    rules:
+      - alert: PdfGenerationP95High
+        expr: job:pdf_duration_seconds:p95 > 6
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PDF generation P95 latency high (>6s)"
+          description: |
+            The 95th percentile of PDF generation duration has exceeded 6 seconds over the last 15 minutes.
+            This may impact user experience. Current P95: {{ $value }}s
+            
+      - alert: PdfErrorRateHigh
+        expr: job:pdf_error_rate5m > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PDF generation error rate high (>5%)"
+          description: |
+            The PDF generation error rate has exceeded 5% over the last 15 minutes.
+            Current error rate: {{ $value | humanizePercentage }}
+
+  - name: pdf-latency
+    rules:
+      - record: job:pdf_duration_seconds:p50
+        expr: histogram_quantile(0.50, sum by (le) (rate(pdf_duration_seconds_bucket[5m])))
+      - record: job:pdf_duration_seconds:p95
+        expr: histogram_quantile(0.95, sum by (le) (rate(pdf_duration_seconds_bucket[5m])))
+      - record: job:pdf_error_rate5m
+        expr: |
+          (sum(rate(pdf_requests_total{status="fail"}[5m])) or vector(0))
+          /
+          clamp_min((sum(rate(pdf_requests_total{status="ok"}[5m])) or vector(0)) + (sum(rate(pdf_requests_total{status="fail"}[5m])) or vector(0)), 1)
+
+  - name: pdf-slo
+    rules:
+      - record: job:pdf_error_rate1h
+        expr: |
+          (sum(rate(pdf_requests_total{status="fail"}[1h])) or vector(0))
+          /
+          clamp_min(sum(rate(pdf_requests_total[1h])) or vector(0), 1)
+      - record: job:pdf_error_rate6h
+        expr: |
+          (sum(rate(pdf_requests_total{status="fail"}[6h])) or vector(0))
+          /
+          clamp_min(sum(rate(pdf_requests_total[6h])) or vector(0), 1)
+
+  - name: pdf-slo-alerts
+    rules:
+      - alert: PdfSLOFastBurn
+        expr: (job:pdf_error_rate5m / 0.01 > 14.4) and (job:pdf_error_rate1h / 0.01 > 6)
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PDF error-budget fast burn"
+          description: |
+            PDF service is burning through error budget very quickly.
+            Current 5m error rate: {{ printf "%.2f" (query "job:pdf_error_rate5m * 100") }}%
+            Current 1h error rate: {{ printf "%.2f" (query "job:pdf_error_rate1h * 100") }}%
+            At this rate, the 99% SLO (30-day) will be exhausted in hours.
+            
+      - alert: PdfSLOSlowBurn
+        expr: (job:pdf_error_rate1h / 0.01 > 3) and (job:pdf_error_rate6h / 0.01 > 1)
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PDF error-budget slow burn"
+          description: |
+            PDF service is consuming error budget at a moderate rate.
+            Current 1h error rate: {{ printf "%.2f" (query "job:pdf_error_rate1h * 100") }}%
+            Current 6h error rate: {{ printf "%.2f" (query "job:pdf_error_rate6h * 100") }}%
+            Monitor closely to ensure 99% SLO (30-day) compliance.

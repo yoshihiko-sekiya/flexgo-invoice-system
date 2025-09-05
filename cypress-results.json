@@ -1,0 +1,25 @@
+
+DevTools listening on ws://127.0.0.1:60954/devtools/browser/65b83701-50a7-4090-978e-ab1c4abc621e
+(node:73547) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///Users/sekiyayoshihiko/Library/Caches/Cypress/14.5.4/Cypress.app/Contents/Resources/app/node_modules/ts-node/esm/transpile-only.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73547) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Opening `/dev/tty` failed (6): Device not configured
+================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        14.5.4                                                                         │
+  │ Browser:        Electron 130 (headless)                                                        │
+  │ Node Version:   v23.11.0 (/opt/homebrew/Cellar/node/23.11.0/bin/node)                          │
+  │ Specs:          1 found (reports_preview.cy.ts)                                                │
+  │ Searched:       cypress/e2e/reports_preview.cy.ts                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  reports_preview.cy.ts                                                           (1 of 1)

@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Version type (patch|minor|major)'
+        required: true
+        default: 'patch'
+      prerelease:
+        description: 'Mark as pre-release (true|false)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm install --no-audit
+
+      - name: Configure git user
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Bump version and generate changelog
+        run: |
+          if [ "${{ github.event.inputs.prerelease }}" = "true" ]; then
+            npx standard-version --prerelease rc --release-as "${{ github.event.inputs.release_type }}"
+          else
+            npx standard-version --release-as "${{ github.event.inputs.release_type }}"
+          fi
+
+      - name: Push changes and tags
+        run: |
+          git push --follow-tags origin HEAD:main
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

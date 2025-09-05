@@ -12,6 +12,10 @@ echo
 echo "=== ci-workflows/promtool.yml ===" && echo
 sed -n '1,999p' "$ROOT_DIR/ci-workflows/promtool.yml"
 
+echo
+echo "=== ci-workflows/release.yml ===" && echo
+sed -n '1,999p' "$ROOT_DIR/ci-workflows/release.yml"
+
 cat << 'TIP'
 
 Tip:
@@ -20,4 +24,3 @@ Tip:
 3) Add Secrets in Settings → Secrets and variables → Actions.
 
 TIP
-

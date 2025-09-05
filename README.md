@@ -178,6 +178,13 @@ Workflows overview:
 - `Smoke (Invoices)`: staging save+refresh, production download-only
 - `E2E (Invoices)`: local dev servers + Cypress E2E for invoice flow
 - `Promtool`: static validation of `prometheus-rule.yml`
+- `Release`: standard-version で CHANGELOG/タグ作成 + GitHub Release 発行
+
+Release workflow (manual):
+- Actions → Release → Run workflow
+  - `release_type`: `patch` | `minor` | `major`
+  - `prerelease`: `true` で `-rc` タグのプレリリース
+  - 実行後: `CHANGELOG.md` 更新、タグ発行、GitHub Release 作成
 ```
 
 ## Storage Security & Access Control

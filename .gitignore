@@ -48,3 +48,8 @@ temp/
 # Capacitor
 ios/
 android/
+
+# Cypress artifacts
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/

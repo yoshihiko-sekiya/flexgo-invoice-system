@@ -6,7 +6,8 @@ import * as Sentry from '@sentry/node'
 import dotenv from 'dotenv'
 import { v4 as uuidv4 } from 'uuid'
 import * as client from 'prom-client'
-import invoiceRoutes from './routes/invoices.js'
+// invoiceRoutes must be imported after dotenv to ensure env vars are loaded.
+// We will dynamically import it later, right before mounting the route.
 
 // TypeScript型拡張 - Request にrequestId とuser プロパティを追加
 declare global {
@@ -350,7 +351,11 @@ app.get('/metrics', async (req, res) => {
 })
 
 // Invoice API routes - 請求・承認機能
-app.use('/api/invoices', invoiceRoutes)
+// Import after dotenv.config() so that routes see SUPABASE_* env vars
+{
+  const { default: invoiceRoutes } = await import('./routes/invoices.js')
+  app.use('/api/invoices', invoiceRoutes)
+}
 
 // テレメトリーエンドポイント - 署名URL期限切れ遭遇報告
 app.post('/api/telemetry/report-expired', async (req, res) => {
